@@ -1,12 +1,3 @@
-
-Here’s a more structured format with the proper closing of the code block:
-
-- The **bash code block** starts after three backticks with `bash` and ends with another set of three backticks (` ``` `) at the end.
-
-This way, your Markdown document will correctly format the code.
-
-
-
 # PORTFOLIO-Data-Mart-Erstellung-in
 
 This guide will walk you through setting up SQL with Python using `SQLite`. You can adapt this guide for other databases such as MySQL or PostgreSQL by installing the corresponding libraries.
@@ -32,7 +23,7 @@ To interact with SQL databases, you'll need the `sqlite3` library. This library 
 
 ```bash
 # SQLite comes with Python, no need to install anything extra
-
+```
 
 # Install psycopg2 for PostgreSQL
 pip install psycopg2
