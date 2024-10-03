@@ -27,26 +27,26 @@ cd portfolio-data-mart
 ```
 python3 -m venv venv
 ```
-# Activate the virtual environment (Windows)
+#### Activate the virtual environment (Windows)
 ```
 venv\Scripts\activate
 ```
-# Activate the virtual environment (MacOS/Linux)
+#### Activate the virtual environment (MacOS/Linux)
 ```
 source venv/bin/activate
 ```
 ### 3. Install dependencies
 
-# For PostgreSQL
+#### For PostgreSQL
 ```
 pip install psycopg2
 ```
-# For MySQL
+#### For MySQL
 ```
 pip install mysql-connector-python
 ```
 ### 4. Running the Python Script
-# To create the database and table, run the script:
+#### To create the database and table, run the script:
 ```
 python create_db.py
 ```
@@ -54,34 +54,34 @@ python create_db.py
 
 import sqlite3
 
-# Connect to the SQLite database (or create it if it doesn't exist)
+#### Connect to the SQLite database (or create it if it doesn't exist)
 conn = sqlite3.connect('example.db')
 
-# Create a cursor object
+#### Create a cursor object
 cur = conn.cursor()
 
-# Example query to create a 'users' table
+#### Example query to create a 'users' table
 cur.execute('''CREATE TABLE IF NOT EXISTS users (
                id INTEGER PRIMARY KEY,
                name TEXT NOT NULL,
                email TEXT NOT NULL)''')
 
-# Commit the changes and close the connection
+#### Commit the changes and close the connection
 conn.commit()
 conn.close()
 
 print("Database and users table created successfully.")
 
-### Optional: Create requirements.txt for dependency management
-# If you're using MySQL or PostgreSQL, you can specify the required libraries:
-# requirements.txt
+#### Optional: Create requirements.txt for dependency management
+#### If you're using MySQL or PostgreSQL, you can specify the required libraries:
+#### requirements.txt
 
 psycopg2==<version>        # PostgreSQL
 mysql-connector-python==<version>  # MySQL
 
-### .gitignore
-# Ignore virtual environment
+#### .gitignore
+#### Ignore virtual environment
 venv/
 
-# Ignore SQLite database
-*.db
+#### Ignore SQLite database
+#### .db
