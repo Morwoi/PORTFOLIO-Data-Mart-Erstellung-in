@@ -17,3 +17,6 @@ https://github.com/Morwoi/Portfoloi-Data-Mart-Erstellung-in-SQL/blob/9882243b2a5
 
 ![image](https://github.com/user-attachments/assets/a46f6804-2b71-4fa2-8bc5-c659a2a78e02)
 
+#### 5. The Database is Setup correktly when the howl skript run throw.
+
+![image](https://github.com/user-attachments/assets/e8d6e692-883d-41d9-a024-4822f2f11a79)
