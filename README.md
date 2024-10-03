@@ -1,3 +1,12 @@
+
+Here’s a more structured format with the proper closing of the code block:
+
+- The **bash code block** starts after three backticks with `bash` and ends with another set of three backticks (` ``` `) at the end.
+
+This way, your Markdown document will correctly format the code.
+
+
+
 # PORTFOLIO-Data-Mart-Erstellung-in
 
 This guide will walk you through setting up SQL with Python using `SQLite`. You can adapt this guide for other databases such as MySQL or PostgreSQL by installing the corresponding libraries.
