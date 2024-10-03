@@ -21,7 +21,7 @@ To interact with SQL databases, you'll need the `sqlite3` library. This library 
 
 ### Install the Required Library for SQLite:
 
-```bash
+
 # SQLite comes with Python, no need to install anything extra
 
 # Install psycopg2 for PostgreSQL
