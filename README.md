@@ -18,10 +18,10 @@ If you're using MySQL or PostgreSQL, install the appropriate Python libraries:
 ## Setup
 
 ### 1. Clone this repository
-
-```git clone https://github.com/yourusername/portfolio-data-mart.git
-```cd portfolio-data-mart
-
+```
+git clone https://github.com/yourusername/portfolio-data-mart.git
+cd portfolio-data-mart
+```
 ### 2. Create and activate a virtual environment
 # Create a virtual environment
 python3 -m venv venv
