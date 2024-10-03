@@ -23,10 +23,12 @@ To interact with SQL databases, you'll need the `sqlite3` library. This library 
 
 ```bash
 # SQLite comes with Python, no need to install anything extra
-```
 
 # Install psycopg2 for PostgreSQL
+```
 pip install psycopg2
+```
+
 
 # Install mysql-connector-python for MySQL
 pip install mysql-connector-python
