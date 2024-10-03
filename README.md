@@ -24,26 +24,32 @@ cd portfolio-data-mart
 ```
 ### 2. Create and activate a virtual environment
 # Create a virtual environment
+```
 python3 -m venv venv
-
+```
 # Activate the virtual environment (Windows)
+```
 venv\Scripts\activate
-
+```
 # Activate the virtual environment (MacOS/Linux)
+```
 source venv/bin/activate
-
+```
 ### 3. Install dependencies
 
 # For PostgreSQL
+```
 pip install psycopg2
-
+```
 # For MySQL
+```
 pip install mysql-connector-python
-
+```
 ### 4. Running the Python Script
 # To create the database and table, run the script:
+```
 python create_db.py
-
+```
 ### Example Python Script: create_db.py
 
 import sqlite3
