@@ -1,16 +1,228 @@
--- Creates the Schema for the Tables
+-- Create the 'dbo' schema
 CREATE SCHEMA `dbo`;
 
--- Table for storing addresses
+-- Table for storing addresses, which may be linked to users, boxes, or books
 CREATE TABLE dbo.tbl_addresses (
-    address_id INT AUTO_INCREMENT PRIMARY KEY,
-    street VARCHAR(60),
-    city VARCHAR(60),
-    postal_code VARCHAR(10),
-    country VARCHAR(60),
-    description VARCHAR(50),
-    deleted BOOLEAN DEFAULT FALSE
+    address_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each address
+    street VARCHAR(60), -- Street name of the address
+    city VARCHAR(60), -- City of the address
+    postal_code VARCHAR(10), -- Postal/ZIP code of the address
+    country VARCHAR(60), -- Country of the address
+    description VARCHAR(50), -- Optional description or label for the address
+    deleted BOOLEAN DEFAULT FALSE -- Soft delete flag (logical deletion)
 );
+
+-- Add index on 'city' and 'postal_code' to improve query performance when searching for addresses
+CREATE INDEX idx_city_postal_code ON dbo.tbl_addresses (city, postal_code);
+
+-- Table for storing book boxes, linked to addresses
+CREATE TABLE dbo.tbl_boxes (
+    box_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each box
+    address_id INT, -- Foreign key referencing the address where the box is located
+    description VARCHAR(255), -- Optional description for the box
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    CONSTRAINT fk_box_address FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id) -- Foreign key constraint to ensure referential integrity
+);
+
+-- Add index on 'address_id' to optimize join performance for queries involving boxes and addresses
+CREATE INDEX idx_boxes_address_id ON dbo.tbl_boxes (address_id);
+
+-- Table for storing user information
+CREATE TABLE dbo.tbl_user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each user
+    first_name VARCHAR(50), -- User's first name
+    last_name VARCHAR(50), -- User's last name
+    email VARCHAR(100), -- User's email address
+    phone_number VARCHAR(50), -- User's phone number
+    address_id INT, -- Foreign key referencing the user's address
+    birth_date DATE, -- User's birth date
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    CONSTRAINT fk_user_address FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id) -- Foreign key constraint to ensure referential integrity
+);
+
+-- Add index on 'address_id' to optimize join performance for queries involving users and addresses
+CREATE INDEX idx_user_address_id ON dbo.tbl_user (address_id);
+
+-- Add unique index on 'email' to ensure no duplicate email addresses are stored
+CREATE UNIQUE INDEX idx_user_email ON dbo.tbl_user (email);
+
+-- Table for storing book categories
+CREATE TABLE dbo.tbl_categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each category
+    name VARCHAR(50), -- Category name (e.g., Fiction, Non-Fiction, Mystery)
+    deleted BOOLEAN DEFAULT FALSE -- Soft delete flag (logical deletion)
+);
+
+-- Add index on 'name' to improve performance when searching for categories by name
+CREATE INDEX idx_categories_name ON dbo.tbl_categories (name);
+
+-- Table for storing languages, which may be linked to books or authors
+CREATE TABLE dbo.tbl_languages (
+    language_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each language
+    language_code CHAR(2), -- Language code (e.g., 'EN' for English, 'FR' for French)
+    language_name VARCHAR(50), -- Full name of the language
+    deleted BOOLEAN DEFAULT FALSE -- Soft delete flag (logical deletion)
+);
+
+-- Add index on 'language_code' and 'language_name' to optimize queries for language lookups
+CREATE INDEX idx_languages_code_name ON dbo.tbl_languages (language_code, language_name);
+
+-- Table for storing authors, with optional linkage to languages
+CREATE TABLE dbo.tbl_authors (
+    author_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each author
+    first_name VARCHAR(50), -- Author's first name
+    last_name VARCHAR(50), -- Author's last name
+    origin VARCHAR(50), -- Author's country of origin
+    language_id INT, -- Foreign key linking the author to their primary language
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (language_id) REFERENCES dbo.tbl_languages(language_id) -- Foreign key constraint to ensure referential integrity
+);
+
+-- Add index on 'language_id' to optimize queries involving author-language lookups
+CREATE INDEX idx_authors_language_id ON dbo.tbl_authors (language_id);
+
+-- Table for storing book information
+CREATE TABLE dbo.tbl_book (
+    book_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each book
+    title VARCHAR(100), -- Book title
+    publication_year INT, -- Year the book was published
+    isbn VARCHAR(17), -- Book's ISBN number (International Standard Book Number)
+    category_id INT, -- Foreign key linking the book to its category
+    read_status BOOLEAN DEFAULT FALSE, -- Flag indicating if the book has been read
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    language_id INT, -- Foreign key linking the book to its language
+    owner_id INT, -- Foreign key linking the book to its owner (user)
+    author_id INT, -- Foreign key linking the book to its author
+    address_id INT, -- Foreign key linking the book to its current address/location
+    FOREIGN KEY (language_id) REFERENCES dbo.tbl_languages(language_id), -- Foreign key constraint for language
+    FOREIGN KEY (category_id) REFERENCES dbo.tbl_categories(category_id), -- Foreign key constraint for category
+    FOREIGN KEY (owner_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (author_id) REFERENCES dbo.tbl_authors(author_id), -- Foreign key constraint for author
+    FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id) -- Foreign key constraint for address
+);
+
+-- Add indexes for improving query performance on the most common search fields in the 'tbl_book' table
+CREATE INDEX idx_book_isbn ON dbo.tbl_book (isbn);
+CREATE INDEX idx_book_category_id ON dbo.tbl_book (category_id);
+CREATE INDEX idx_book_language_id ON dbo.tbl_book (language_id);
+CREATE INDEX idx_book_owner_id ON dbo.tbl_book (owner_id);
+CREATE INDEX idx_book_author_id ON dbo.tbl_book (author_id);
+CREATE INDEX idx_book_address_id ON dbo.tbl_book (address_id);
+
+-- Table for storing records of borrowed books
+CREATE TABLE dbo.tbl_borrowings (
+    borrowing_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each borrowing record
+    user_id INT, -- Foreign key linking the record to the borrowing user
+    book_id INT, -- Foreign key linking the record to the borrowed book
+    borrow_date DATE, -- Date when the book was borrowed
+    return_date DATE, -- Date when the book is due to be returned
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for book
+);
+
+-- Add indexes to optimize lookup of borrowings by user or book
+CREATE INDEX idx_borrowings_user_id ON dbo.tbl_borrowings (user_id);
+CREATE INDEX idx_borrowings_book_id ON dbo.tbl_borrowings (book_id);
+
+-- Table for storing book reservation records
+CREATE TABLE dbo.tbl_reservations (
+    reservation_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each reservation
+    user_id INT, -- Foreign key linking the reservation to the user
+    book_id INT, -- Foreign key linking the reservation to the book
+    reservation_date DATE, -- Date when the reservation was made
+    status VARCHAR(50), -- Status of the reservation (e.g., Pending, Confirmed)
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for book
+);
+
+-- Add indexes to optimize lookup of reservations by user or book
+CREATE INDEX idx_reservations_user_id ON dbo.tbl_reservations (user_id);
+CREATE INDEX idx_reservations_book_id ON dbo.tbl_reservations (book_id);
+
+-- Table for storing book ratings and reviews
+CREATE TABLE dbo.tbl_ratings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each rating record
+    user_id INT, -- Foreign key linking the rating to the user
+    book_id INT, -- Foreign key linking the rating to the book
+    rating INT, -- Numerical rating (e.g., out of 5 stars)
+    comment TEXT, -- Optional comment or review text
+    rating_date DATE, -- Date when the rating was submitted
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for book
+);
+
+-- Add indexes to optimize lookup of ratings by user or book
+CREATE INDEX idx_ratings_user_id ON dbo.tbl_ratings (user_id);
+CREATE INDEX idx_ratings_book_id ON dbo.tbl_ratings (book_id);
+
+-- Table for logging changes in book positions/locations
+CREATE TABLE dbo.tbl_position_log (
+    position_log_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each position log entry
+    user_id INT, -- Foreign key linking the log entry to the user
+    book_id INT, -- Foreign key linking the log entry to the book
+    log_date DATE, -- Date of the position change
+    previous_address_id INT, -- Foreign key linking to the previous address
+    new_address_id INT, -- Foreign key linking to the new address
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id), -- Foreign key constraint for book
+    FOREIGN KEY (previous_address_id) REFERENCES dbo.tbl_addresses(address_id), -- Foreign key constraint for previous address
+    FOREIGN KEY (new_address_id) REFERENCES dbo.tbl_addresses(address_id) -- Foreign key constraint for new address
+);
+
+-- Add indexes to optimize position log lookups by user or book
+CREATE INDEX idx_position_log_user_id ON dbo.tbl_position_log (user_id);
+CREATE INDEX idx_position_log_book_id ON dbo.tbl_position_log (book_id);
+
+-- Table for logging changes in book read statuses (e.g., from 'unread' to 'read')
+CREATE TABLE dbo.tbl_read_status_log (
+    read_status_log_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each read status log entry
+    user_id INT, -- Foreign key linking the log entry to the user
+    book_id INT, -- Foreign key linking the log entry to the book
+    previous_read_status BOOLEAN, -- The book's previous read status (True/False)
+    new_read_status BOOLEAN, -- The book's new read status (True/False)
+    log_date DATE, -- Date when the read status was changed
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for book
+);
+
+-- Add indexes to optimize read status log lookups by user or book
+CREATE INDEX idx_read_status_log_user_id ON dbo.tbl_read_status_log (user_id);
+CREATE INDEX idx_read_status_log_book_id ON dbo.tbl_read_status_log (book_id);
+
+-- Table for storing user wishlists
+CREATE TABLE dbo.tbl_wishlists (
+    wishlist_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each wishlist entry
+    user_id INT, -- Foreign key linking the wishlist entry to the user
+    book_id INT, -- Foreign key linking the wishlist entry to the book
+    added DATE, -- Date when the book was added to the wishlist
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for book
+);
+
+-- Add indexes to optimize wishlist lookups by user or book
+CREATE INDEX idx_wishlist_user_id ON dbo.tbl_wishlists (user_id);
+CREATE INDEX idx_wishlist_book_id ON dbo.tbl_wishlists (book_id);
+
+-- Table for storing book recommendations, where one book is recommended based on another
+CREATE TABLE dbo.tbl_recommendations (
+    recommendations_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each recommendation entry
+    user_id INT, -- Foreign key linking the recommendation to the user
+    book_id INT, -- Foreign key linking the recommendation to the original book
+    recommendation_book_id INT, -- Foreign key linking the recommendation to the recommended book
+    deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag (logical deletion)
+    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id), -- Foreign key constraint for user
+    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id), -- Foreign key constraint for the original book
+    FOREIGN KEY (recommendation_book_id) REFERENCES dbo.tbl_book(book_id) -- Foreign key constraint for the recommended book
+);
+
+-- Add indexes to optimize recommendation lookups by user or book
+CREATE INDEX idx_recommendations_user_id ON dbo.tbl_recommendations (user_id);
+CREATE INDEX idx_recommendations_book_id ON dbo.tbl_recommendations (book_id);
+
 
 -- Insert data into dbo.tbl_addresses
 INSERT INTO dbo.tbl_addresses (street, city, postal_code, country, description) VALUES
@@ -31,15 +243,6 @@ INSERT INTO dbo.tbl_addresses (street, city, postal_code, country, description) 
 ('Rathausplatz 14', 'Bludenz', '6700', 'Österreich', 'Bücherbox'),
 ('Museumsstraße 15', 'Hohenems', '6845', 'Österreich', 'Bücherbox');
 
--- Table for storing book boxes, describes where the Boxes are stored.
-CREATE TABLE dbo.tbl_boxes (
-    box_id INT AUTO_INCREMENT PRIMARY KEY,
-    address_id INT,
-    description VARCHAR(255),
-    deleted BOOLEAN DEFAULT FALSE,
-    CONSTRAINT fk_box_address FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id)
-);
-
 -- Insert data into tbl_boxes
 INSERT INTO dbo.tbl_boxes (address_id, description) VALUES
 (5, 'Lagerbox vor der Schule'),
@@ -54,18 +257,6 @@ INSERT INTO dbo.tbl_boxes (address_id, description) VALUES
 (14, 'Lagerbox am Stadtrand'),
 (15, 'Lagerbox am Seeufer');
 
--- Table for storing user information
-CREATE TABLE dbo.tbl_user (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    email VARCHAR(100),
-    phone_number VARCHAR(50),
-    address_id INT,
-    birth_date DATE,
-    deleted BOOLEAN DEFAULT FALSE,
-    CONSTRAINT fk_user_address FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id)
-);
 
 -- Insert data into dbo.tbl_user
 INSERT INTO dbo.tbl_user (first_name, last_name, email, phone_number, address_id, birth_date) VALUES
@@ -81,12 +272,6 @@ INSERT INTO dbo.tbl_user (first_name, last_name, email, phone_number, address_id
 ('Laura', 'Weber', 'laura.weber@example.com', '0664-0123456', 5, '1994-10-10'),
 ('Wunsch', 'Benutzer', 'wunsch.benutzer@example.com', '0664-0000000', 1, '2000-01-01');
 
--- Table for storing book categories
-CREATE TABLE dbo.tbl_categories (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50),
-    deleted BOOLEAN DEFAULT FALSE
-);
 
 -- Insert data into tbl_categories
 INSERT INTO dbo.tbl_categories (name) VALUES
@@ -101,14 +286,6 @@ INSERT INTO dbo.tbl_categories (name) VALUES
 ('Thriller'),
 ('Politik');
 
--- Table for storing languages
-CREATE TABLE dbo.tbl_languages (
-    language_id INT AUTO_INCREMENT PRIMARY KEY,
-    language_code CHAR(2),
-    language_name VARCHAR(50),
-    deleted BOOLEAN DEFAULT FALSE
-);
-
 -- Insert data into tbl_languages
 INSERT INTO dbo.tbl_languages (language_code, language_name) VALUES
 ('DE', 'Deutsch'),
@@ -122,16 +299,6 @@ INSERT INTO dbo.tbl_languages (language_code, language_name) VALUES
 ('SV', 'Schwedisch'),
 ('PL', 'Polnisch');
 
--- Table for storing authors
-CREATE TABLE dbo.tbl_authors (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    origin VARCHAR(50),
-    language_id INT,
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (language_id) REFERENCES dbo.tbl_languages(language_id)
-);
 
 -- Insert data into dbo.tbl_authors
 	INSERT INTO dbo.tbl_authors (first_name, last_name, origin, language_id) VALUES
@@ -147,25 +314,6 @@ CREATE TABLE dbo.tbl_authors (
 	('Charles', 'Dickens', 'England', 2),
 	('Aldous', 'Huxley', 'United Kingdom', 2);
 
--- Table for storing book information
-CREATE TABLE dbo.tbl_book (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100),
-    publication_year INT,
-    isbn VARCHAR(17),
-    category_id INT,
-    read_status BOOLEAN DEFAULT FALSE,
-    deleted BOOLEAN DEFAULT FALSE,
-    language_id INT,
-    owner_id INT,
-    author_id INT,
-    address_id INT,
-    FOREIGN KEY (language_id) REFERENCES dbo.tbl_languages(language_id),
-    FOREIGN KEY (category_id) REFERENCES dbo.tbl_categories(category_id),
-    FOREIGN KEY (owner_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (author_id) REFERENCES dbo.tbl_authors(author_id),
-    FOREIGN KEY (address_id) REFERENCES dbo.tbl_addresses(address_id)
-);
 
 -- Insert data into tbl_book
 INSERT INTO dbo.tbl_book (title, publication_year, isbn, category_id, language_id, owner_id, author_id, address_id) VALUES
@@ -181,17 +329,6 @@ INSERT INTO dbo.tbl_book (title, publication_year, isbn, category_id, language_i
 ('Buddenbrooks', 1901, '9783150000199', 10, 1, 9, 5, 9),
 ('War and Peace', 1869, '9783150000205', 5, 1, 10, 6, 10);
 
--- Table for storing book borrowing records
-CREATE TABLE dbo.tbl_borrowings (
-    borrowing_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    borrow_date DATE,
-    return_date DATE,
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id)
-);
 
 -- Insert data into tbl_borrowings
 INSERT INTO dbo.tbl_borrowings (user_id, book_id, borrow_date, return_date) VALUES
@@ -206,18 +343,6 @@ INSERT INTO dbo.tbl_borrowings (user_id, book_id, borrow_date, return_date) VALU
 (4, 9, '2024-06-09', '2024-06-14'),
 (5, 10, '2024-06-10', '2024-06-20');
 
--- Table for storing book reservation records
-CREATE TABLE dbo.tbl_reservations (
-    reservation_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    reservation_date DATE,
-    status VARCHAR(255),
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id)
-);
-
 -- Insert data into tbl_reservations
 INSERT INTO dbo.tbl_reservations (user_id, book_id, reservation_date) VALUES
 (1, 6, '2024-06-01'),
@@ -231,18 +356,7 @@ INSERT INTO dbo.tbl_reservations (user_id, book_id, reservation_date) VALUES
 (4, 10, '2024-06-09'),
 (5, 10, '2024-06-10');
 
--- Table for storing book ratings
-CREATE TABLE dbo.tbl_ratings (
-    rating_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    rating INT,
-    comment TEXT,
-    rating_date DATE,
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id)
-);
+
 
 -- Insert data into tbl_ratings
 INSERT INTO dbo.tbl_ratings (user_id, book_id, rating, comment, rating_date) VALUES
@@ -257,19 +371,7 @@ INSERT INTO dbo.tbl_ratings (user_id, book_id, rating, comment, rating_date) VAL
 (4, 5, 6, 'Hat mir nicht gefallen.', '2024-05-15'),
 (5, 5, 3, 'Interessante Ideen.', '2024-05-20');
 
--- Table for logging changes in book position
-CREATE TABLE dbo.tbl_position_log (
-    position_log_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    log_date DATE,
-    previous_address_id INT,
-    new_address_id INT,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id),
-    FOREIGN KEY (previous_address_id) REFERENCES dbo.tbl_addresses(address_id),
-    FOREIGN KEY (new_address_id) REFERENCES dbo.tbl_addresses(address_id)
-);
+
 
 -- Insert data into tbl_position_log
 INSERT INTO dbo.tbl_position_log (user_id, book_id, log_date, previous_address_id, new_address_id) VALUES
@@ -283,18 +385,6 @@ INSERT INTO dbo.tbl_position_log (user_id, book_id, log_date, previous_address_i
 (3, 3, '2024-06-15', 4, 5),
 (4, 4, '2024-06-17', 5, 6),
 (5, 5, '2024-06-19', 6, 7);
-
--- Table for logging changes in book read statuses
-CREATE TABLE dbo.tbl_read_status_log (
-    read_status_log_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    previous_read_status BOOLEAN,
-    new_read_status BOOLEAN,
-    log_date DATE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id)
-);
 
 -- Insert data into tbl_read_status_log
 INSERT INTO dbo.tbl_read_status_log (user_id, book_id, previous_read_status, new_read_status, log_date) VALUES
@@ -310,16 +400,6 @@ INSERT INTO dbo.tbl_read_status_log (user_id, book_id, previous_read_status, new
 (6, 9, TRUE, FALSE, '2024-06-20');
 
 
--- Table for storing user wishlists
-CREATE TABLE dbo.tbl_wishlists (
-    wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    added DATE,
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id)
-);
 
 -- Insert data into tbl_wishlists with more random data
 INSERT INTO dbo.tbl_wishlists (user_id, book_id, added) VALUES
@@ -333,18 +413,6 @@ INSERT INTO dbo.tbl_wishlists (user_id, book_id, added) VALUES
 (3, 1, '2024-06-08'),
 (4, 1, '2024-06-09'),
 (5, 1, '2024-06-10');
-
--- Table for storing book recommendations
-CREATE TABLE dbo.tbl_recommendations (
-    recommendations_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    book_id INT,
-    recommendation_book_id INT,
-    deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES dbo.tbl_user(user_id),
-    FOREIGN KEY (book_id) REFERENCES dbo.tbl_book(book_id),
-    FOREIGN KEY (recommendation_book_id) REFERENCES dbo.tbl_book(book_id)
-);
 
 -- Insert data into tbl_recommendations
 INSERT INTO dbo.tbl_recommendations (user_id, book_id, recommendation_book_id) VALUES
