@@ -1,4 +1,4 @@
-# Database Setup Instructions
+# Database Setup Instructions on Windows with MySQL
 
 
 ## Steps for Setting Up the Database
