@@ -3,6 +3,10 @@
 
 ## Steps for Setting Up the Database
 
+#### Requirments
+Make Sure you have MYSQL installed or go to:
+[MySQL]([https://github.com/Morwoi/Portfoloi-Data-Mart-Erstellung-in-SQL/blob/9882243b2a5759eda6abaa77d910b621c552664d/Creat_Database.sql](https://dev.mysql.com/downloads/installer/)) and install MySQL
+
 
 #### 1. Launch MySQL Workbench
 Ensure that MySQL Workbench is open and ready to use.
