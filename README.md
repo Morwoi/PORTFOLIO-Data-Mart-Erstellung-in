@@ -1,12 +1,10 @@
 # Database Setup Instructions on Windows with MySQL
 
-
-## Steps for Setting Up the Database
-
 #### Requirments
 Make Sure you have MySQL installed or go to:
 [MySQL](https://dev.mysql.com/downloads/installer/) and install MySQL
 
+## Steps for Setting Up the Database
 
 #### 1. Launch MySQL Workbench
 Ensure that MySQL Workbench is open and ready to use.
