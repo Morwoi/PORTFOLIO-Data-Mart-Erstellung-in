@@ -25,7 +25,8 @@ Alternatively, you can copy the SQL script directly from the link.
 #### 4. Open and Execute the SQL Script in MySQL Workbench
 Once you have the script, open it in MySQL Workbench and execute the code by running the script.
 
-![image](https://github.com/user-attachments/assets/a46f6804-2b71-4fa2-8bc5-c659a2a78e02)
+![image](https://github.com/user-attachments/assets/15f89577-8a71-452f-8f4a-99566d17f8a3)
+
 
 #### 5. Verify the Database Setup
 The database is successfully set up when the entire script executes without errors.
