@@ -1,5 +1,6 @@
 -- Creates a new user who borrows a book and returns it
 
+
 -- 1. Define variables for the new address
 SET @street = 'Musterstraße 123';
 SET @city = 'Musterstadt';
