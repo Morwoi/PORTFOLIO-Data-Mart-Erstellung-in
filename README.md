@@ -14,7 +14,8 @@ Ensure that MySQL Workbench is open and ready to use.
 #### 2. Verify Your Server is Running
 Check that your MySQL server is running, as shown in the image below:
 
-![image](https://github.com/user-attachments/assets/b7f9ef98-77f4-4b00-87a9-cffe8f271fb0)
+![image](https://github.com/user-attachments/assets/1cc05567-62ee-49eb-a61f-ab471799d679)
+
 
 #### 3. Download or Copy Creat_Database.sql
 Download the SQL script from the following link: [Creat_Databse.sql](https://github.com/Morwoi/Portfoloi-Data-Mart-Erstellung-in-SQL/blob/9882243b2a5759eda6abaa77d910b621c552664d/Creat_Database.sql)
