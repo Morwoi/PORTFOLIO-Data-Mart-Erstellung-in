@@ -4,7 +4,7 @@
 ## Steps for Setting Up the Database
 
 #### Requirments
-Make Sure you have MYSQL installed or go to:
+Make Sure you have MySQL installed or go to:
 [MySQL](https://dev.mysql.com/downloads/installer/) and install MySQL
 
 
