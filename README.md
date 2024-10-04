@@ -11,7 +11,7 @@ Ensure that MySQL Workbench is open and ready to use.
 
 #### 2. Verify Your Server is Running
 Check that your MySQL server is running, as shown in the image below:
-``` services.msc
+``` services.msc```
 
 ![image](https://github.com/user-attachments/assets/1cc05567-62ee-49eb-a61f-ab471799d679)
 
